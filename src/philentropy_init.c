@@ -31,6 +31,7 @@ extern SEXP _philentropy_divergence_sq(SEXP, SEXP, SEXP);
 extern SEXP _philentropy_Ecpp(SEXP, SEXP);
 extern SEXP _philentropy_est_prob_empirical(SEXP);
 extern SEXP _philentropy_euclidean(SEXP, SEXP, SEXP);
+extern SEXP _philentropy_euclidean2(SEXP, SEXP, SEXP);
 extern SEXP _philentropy_fidelity(SEXP, SEXP, SEXP);
 extern SEXP _philentropy_gower(SEXP, SEXP, SEXP);
 extern SEXP _philentropy_harmonic_mean_dist(SEXP, SEXP, SEXP);
@@ -96,6 +97,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"_philentropy_Ecpp",                         (DL_FUNC) &_philentropy_Ecpp,                         2},
   {"_philentropy_est_prob_empirical",           (DL_FUNC) &_philentropy_est_prob_empirical,           1},
   {"_philentropy_euclidean",                    (DL_FUNC) &_philentropy_euclidean,                    3},
+  {"_philentropy_euclidean2",                   (DL_FUNC) &_philentropy_euclidean2,                    3},
   {"_philentropy_fidelity",                     (DL_FUNC) &_philentropy_fidelity,                     3},
   {"_philentropy_gower",                        (DL_FUNC) &_philentropy_gower,                        3},
   {"_philentropy_harmonic_mean_dist",           (DL_FUNC) &_philentropy_harmonic_mean_dist,           3},

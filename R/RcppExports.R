@@ -70,6 +70,10 @@ euclidean <- function(P, Q, testNA) {
     .Call(`_philentropy_euclidean`, P, Q, testNA)
 }
 
+euclidean2 <- function(P, Q, testNA) {
+    .Call(`_philentropy_euclidean2`, P, Q, testNA)
+}
+
 #' @title Manhattan distance (lowlevel function)
 #' @description The lowlevel function for computing the manhattan distance.
 #' @param P a numeric vector storing the first distribution.

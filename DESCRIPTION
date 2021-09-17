@@ -17,7 +17,7 @@ Imports:
     KernSmooth
 License: GPL-2
 LazyData: true
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppEigen
 URL: https://github.com/drostlab/philentropy
 Suggests:
     testthat,

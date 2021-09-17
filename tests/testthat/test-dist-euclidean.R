@@ -109,6 +109,28 @@ test_that("Correct euclidean distance is computed when vectors contain 0 values 
                      as.vector(dist(distMat)))
 })
 
+#
+N=10000
+P <- list()
+Q <- list()
+# Create n vectors of random numbers - length 10. This works ok.
+for (i in c(1:N)){
+        P[[i]]<-stats::rnorm(1000)
+        Q[[i]]<-stats::rnorm(1000)
+}
+test_that("Timeit euclidean distance is computed fast ...", {
+        #start_time <- Sys.time()
+        system.time(
+        for(repeatition in c(1:100)){
+                for(it in c(1:N)){        
+                        philentropy::euclidean2(P[[it]], Q[[it]], testNA = F)
+                }
+        })
+        #end_time <- Sys.time()
+        #val = end_time - start_time
+        context(paste("Timing:", val))
+})
+
 
 
 

@@ -2,6 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include "../inst/include/philentropy.h"
+#include <RcppEigen.h>
 #include <Rcpp.h>
 #include <string>
 #include <set>
@@ -197,6 +198,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type Q(QSEXP);
     Rcpp::traits::input_parameter< bool >::type testNA(testNASEXP);
     rcpp_result_gen = Rcpp::wrap(euclidean(P, Q, testNA));
+    return rcpp_result_gen;
+END_RCPP
+}
+// euclidean2
+double euclidean2(const Rcpp::NumericVector& P, const Rcpp::NumericVector& Q, bool testNA);
+RcppExport SEXP _philentropy_euclidean2(SEXP PSEXP, SEXP QSEXP, SEXP testNASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< bool >::type testNA(testNASEXP);
+    rcpp_result_gen = Rcpp::wrap(euclidean2(P, Q, testNA));
     return rcpp_result_gen;
 END_RCPP
 }
