@@ -1,9 +1,10 @@
-pandoc: 2.7.3
+pandoc: 2.11.4
 pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   Distances: Distances.html
   Information_Theory: Information_Theory.html
   Introduction: Introduction.html
-last_built: 2020-11-23T10:02Z
+  Many_Distances: Many_Distances.html
+last_built: 2021-08-21T11:03Z
 

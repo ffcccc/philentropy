@@ -1,6 +1,6 @@
 #  Part of the philentropy package
 #
-#  Copyright (C) 2015-2020 Hajk-Georg Drost
+#  Copyright (C) 2015-2021 Hajk-Georg Drost
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,19 @@
 #' @param p power of the Minkowski distance.
 #' @param test.na a boolean value indicating whether input vectors should be tested for \code{NA} values. Faster computations if \code{test.na = FALSE}.
 #' @param unit a character string specifying the logarithm unit that should be used to compute distances that depend on log computations.
+#' @param epsilon a small value to address cases in the distance computation where division by zero occurs. In
+#' these cases, x / 0 or 0 / 0 will be replaced by \code{epsilon}. The default is \code{epsilon = 0.00001}.
+#' However, we recommend to choose a custom \code{epsilon} value depending on the size of the input vectors,
+#' the expected similarity between compared probability density functions and 
+#' whether or not many 0 values are present within the compared vectors.
+#' As a rough rule of thumb we suggest that when dealing with very large 
+#' input vectors which are very similar and contain many \code{0} values,
+#' the \code{epsilon} value should be set even smaller (e.g. \code{epsilon = 0.000000001}),
+#' whereas when vector sizes are small or distributions very divergent then
+#' higher \code{epsilon} values may also be appropriate (e.g. \code{epsilon = 0.01}).
+#' Addressing this \code{epsilon} issue is important to avoid cases where distance metrics
+#' return negative values which are not defined and only occur due to the
+#' technical issues of computing x / 0 or 0 / 0 cases.
 #' @param est.prob method to estimate probabilities from input count vectors such as non-probability vectors. Default: \code{est.prob = NULL}. Options are:
 #' \itemize{
 #' \item \code{est.prob = "empirical"}: The relative frequencies of each vector are computed internally. For example an input matrix \code{rbind(1:10, 11:20)} will be transformed to a probability vector \code{rbind(1:10 / sum(1:10), 11:20 / sum(11:20))}
@@ -34,10 +47,10 @@
 #' @param as.dist.obj shall the return value or matrix be an object of class \code{link[stats]{dist}}? Default is \code{as.dist.obj = FALSE}.
 #' @param diag if \code{as.dist.obj = TRUE}, then this value indicates whether the diagonal of the distance matrix should be printed. Default
 #' @param upper if \code{as.dist.obj = TRUE}, then this value indicates whether the upper triangle of the distance matrix should be printed.
-#' @param mute_message a logical value indicating whether or not messages printed by \code{distance} shall be muted. Default is \code{mute_message = FALSE}.
+#' @param mute.message a logical value indicating whether or not messages printed by \code{distance} shall be muted. Default is \code{mute.message = FALSE}.
 #' @author Hajk-Georg Drost
 #' @details
-#' Here a distance is defined as a quantitative degree of how far two mathamatical objects are apart from eachother (Cha, 2007).
+#' Here a distance is defined as a quantitative degree of how far two mathematical objects are apart from eachother (Cha, 2007).
 #'
 #' This function implements the following distance/similarity measures to quantify the distance between probability density functions:
 #'
@@ -203,12 +216,13 @@ distance <- function(x ,
                      p           = NULL,
                      test.na     = TRUE,
                      unit        = "log",
+                     epsilon     = 0.00001,
                      est.prob    = NULL,
                      use.row.names = FALSE,
                      as.dist.obj = FALSE,
                      diag = FALSE,
                      upper = FALSE,
-                     mute_message = FALSE) {
+                     mute.message = FALSE) {
   if (!any(is.element(
     class(x),
     c(
@@ -227,7 +241,7 @@ distance <- function(x ,
     stop(
       paste0(
         "Your input ",
-        class(x),
+        class(x)[1],
         " stores non-numeric values. Non numeric values cannot be used to compute distances.."
       ),
       call = FALSE
@@ -331,7 +345,7 @@ distance <- function(x ,
   
   
   if (method == "euclidean") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     
     if (ncols == 2)
@@ -343,7 +357,7 @@ distance <- function(x ,
   }
   
   else if (method == "manhattan") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     
     if (ncols == 2)
@@ -356,7 +370,7 @@ distance <- function(x ,
   }
   
   else if (method == "minkowski") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "'; p = ",
@@ -378,7 +392,7 @@ distance <- function(x ,
   }
   
   else if (method == "chebyshev") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- chebyshev(x[, 1], x[, 2], test.na)
@@ -389,7 +403,7 @@ distance <- function(x ,
   }
   
   else if (method == "sorensen") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- sorensen(x[, 1], x[, 2], test.na)
@@ -400,7 +414,7 @@ distance <- function(x ,
   }
   
   else if (method == "gower") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- gower(x[, 1], x[, 2], test.na)
@@ -410,7 +424,7 @@ distance <- function(x ,
   }
   
   else if (method == "soergel") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- soergel(x[, 1], x[, 2], test.na)
@@ -420,19 +434,19 @@ distance <- function(x ,
   }
   
   else if (method == "kulczynski_d") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
-        kulczynski_d(x[, 1], x[, 2], test.na)
+        kulczynski_d(x[, 1], x[, 2], test.na, epsilon)
     
     if (ncols > 2)
       dist <-
-        DistMatrixNoUnit(x, kulczynski_d, test.na)
+        DistMatrixNoUnit_epsilon(x, kulczynski_d, test.na, epsilon)
   }
   
   else if (method == "canberra") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- canberra(x[, 1], x[, 2], test.na)
@@ -442,7 +456,7 @@ distance <- function(x ,
   }
   
   else if (method == "lorentzian") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -459,7 +473,7 @@ distance <- function(x ,
   }
   
   else if (method == "intersection") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -472,7 +486,7 @@ distance <- function(x ,
   }
   
   else if (method == "non-intersection") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -484,7 +498,7 @@ distance <- function(x ,
   }
   
   else if (method == "wavehedges") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -497,7 +511,7 @@ distance <- function(x ,
   }
   
   else if (method == "czekanowski") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -509,7 +523,7 @@ distance <- function(x ,
   }
   
   else if (method == "motyka") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- motyka(x[, 1], x[, 2], test.na)
@@ -519,19 +533,19 @@ distance <- function(x ,
   }
   
   else if (method == "kulczynski_s") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
-        1.0 / kulczynski_d(x[, 1], x[, 2], test.na)
+        1.0 / kulczynski_d(x[, 1], x[, 2], test.na, epsilon)
     
     if (ncols > 2)
       dist <-
-        1.0 / DistMatrixNoUnit(x, kulczynski_d, test.na)
+        1.0 / DistMatrixNoUnit_epsilon(x, kulczynski_d, test.na, epsilon)
   }
   
   else if (method == "tanimoto") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- tanimoto(x[, 1], x[, 2], test.na)
@@ -541,7 +555,7 @@ distance <- function(x ,
   }
   
   else if (method == "ruzicka") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- ruzicka(x[, 1], x[, 2], test.na)
@@ -551,7 +565,7 @@ distance <- function(x ,
   }
   
   else if (method == "inner_product") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -563,7 +577,7 @@ distance <- function(x ,
   }
   
   else if (method == "harmonic_mean") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -576,7 +590,7 @@ distance <- function(x ,
   }
   
   else if (method == "cosine") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -589,7 +603,7 @@ distance <- function(x ,
   }
   
   else if (method == "hassebrook") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -602,7 +616,7 @@ distance <- function(x ,
   }
   
   else if (method == "jaccard") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- jaccard(x[, 1], x[, 2], test.na)
@@ -613,7 +627,7 @@ distance <- function(x ,
   }
   
   else if (method == "dice") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- dice_dist(x[, 1], x[, 2], test.na)
@@ -625,7 +639,7 @@ distance <- function(x ,
   }
   
   else if (method == "fidelity") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- fidelity(x[, 1], x[, 2], test.na)
@@ -635,7 +649,7 @@ distance <- function(x ,
   }
   
   else if (method == "bhattacharyya") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -645,14 +659,14 @@ distance <- function(x ,
               " vectors.")
     if (ncols == 2)
       dist <-
-        bhattacharyya(x[, 1], x[, 2], test.na, unit)
+        bhattacharyya(x[, 1], x[, 2], test.na, unit, epsilon)
     if (ncols > 2)
       dist <-
-        DistMatrix(x, bhattacharyya, test.na, unit)
+        DistMatrix_epsilon(x, bhattacharyya, test.na, unit, epsilon)
   }
   
   else if (method == "hellinger") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- hellinger(x[, 1], x[, 2], test.na)
@@ -663,7 +677,7 @@ distance <- function(x ,
   }
   
   else if (method == "matusita") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     
     if (any(colSums(x) > 1.00001))
@@ -677,7 +691,7 @@ distance <- function(x ,
   }
   
   else if (method == "squared_chord") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -689,7 +703,7 @@ distance <- function(x ,
   }
   
   else if (method == "squared_euclidean") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -701,33 +715,33 @@ distance <- function(x ,
   }
   
   else if (method == "pearson") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
-        pearson_chi_sq(x[, 1], x[, 2], test.na)
+        pearson_chi_sq(x[, 1], x[, 2], test.na, epsilon)
     
     if (ncols > 2)
       dist <-
-        DistMatrixNoUnit(x, pearson_chi_sq, test.na)
+        DistMatrixNoUnit_epsilon(x, pearson_chi_sq, test.na, epsilon)
     
   }
   
   else if (method == "neyman") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
-        neyman_chi_sq(x[, 1], x[, 2], test.na)
+        neyman_chi_sq(x[, 1], x[, 2], test.na, epsilon)
     
     if (ncols > 2)
       dist <-
-        DistMatrixNoUnit(x, neyman_chi_sq, test.na)
+        DistMatrixNoUnit_epsilon(x, neyman_chi_sq, test.na, epsilon)
     
   }
   
   else if (method == "squared_chi") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -740,7 +754,7 @@ distance <- function(x ,
   }
   
   else if (method == "prob_symm") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -753,7 +767,7 @@ distance <- function(x ,
   }
   
   else if (method == "divergence") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -766,7 +780,7 @@ distance <- function(x ,
   }
   
   else if (method == "clark") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- clark_sq(x[, 1], x[, 2], test.na)
@@ -777,7 +791,7 @@ distance <- function(x ,
   }
   
   else if (method == "additive_symm") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
@@ -790,7 +804,7 @@ distance <- function(x ,
   }
   
   else if (method == "kullback-leibler") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -803,14 +817,14 @@ distance <- function(x ,
     
     if (ncols == 2)
       dist <-
-        kullback_leibler_distance(x[, 1], x[, 2], test.na, unit)
+        kullback_leibler_distance(x[, 1], x[, 2], test.na, unit, epsilon)
     if (ncols > 2)
       dist <-
-        DistMatrix(x, kullback_leibler_distance, test.na, unit)
+        DistMatrix_epsilon(x, kullback_leibler_distance, test.na, unit, epsilon)
   }
   
   else if (method == "jeffreys") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -820,14 +834,14 @@ distance <- function(x ,
               " vectors.")
     if (ncols == 2)
       dist <-
-        jeffreys(x[, 1], x[, 2], test.na, unit)
+        jeffreys(x[, 1], x[, 2], test.na, unit, epsilon)
     if (ncols > 2)
-      dist <- DistMatrix(x, jeffreys, test.na, unit)
+      dist <- DistMatrix_epsilon(x, jeffreys, test.na, unit, epsilon)
     
   }
   
   else if (method == "k_divergence") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -847,7 +861,7 @@ distance <- function(x ,
   }
   
   else if (method == "topsoe") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -864,7 +878,7 @@ distance <- function(x ,
   }
   
   else if (method == "jensen-shannon") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -881,7 +895,7 @@ distance <- function(x ,
   }
   
   else if (method == "jensen_difference") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -898,7 +912,7 @@ distance <- function(x ,
   }
   
   else if (method == "taneja") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '",
               method,
               "' using unit: '",
@@ -909,24 +923,24 @@ distance <- function(x ,
     
     if (ncols == 2)
       dist <-
-        taneja(x[, 1], x[, 2], test.na, unit)
+        taneja(x[, 1], x[, 2], test.na, unit, epsilon)
     if (ncols > 2)
-      dist <- DistMatrix(x, taneja, test.na, unit)
+      dist <- DistMatrix_epsilon(x, taneja, test.na, unit, epsilon)
   }
   
   else if (method == "kumar-johnson") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <-
-        kumar_johnson(x[, 1], x[, 2], test.na)
+        kumar_johnson(x[, 1], x[, 2], test.na, epsilon)
     if (ncols > 2)
       dist <-
-        DistMatrixNoUnit(x, kumar_johnson, test.na)
+        DistMatrixNoUnit_epsilon(x, kumar_johnson, test.na, epsilon)
   }
   
   else if (method == "avg") {
-    if (!mute_message)
+    if (!mute.message)
       message("Metric: '", method, "'; comparing: ", ncols, " vectors.")
     if (ncols == 2)
       dist <- avg(x[, 1], x[, 2], test.na)
@@ -952,7 +966,11 @@ distance <- function(x ,
     return(dist)
   
   if (as.dist.obj) {
-    dist <- stats::as.dist(dist, diag = diag, upper = upper)
+    if (ncols == 2) {
+      dist <- stats::as.dist(matrix(c(0, dist, dist, 0), nrow = 2), diag = diag, upper = upper)
+    } else {
+      dist <- stats::as.dist(dist, diag = diag, upper = upper)
+    }
     attr(dist, "method") <- method
     return(dist)
   }
