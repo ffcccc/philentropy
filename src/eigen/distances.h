@@ -54,14 +54,15 @@
 
 
 // [[Rcpp::export]]
-double euclidean(const Map[ArrayXd]& P,const Map[ArrayXd]& Q, bool testNA){
+double euclidean(const Eigen::Map<Eigen::ArrayXd>& P,const Eigen::Map<Eigen::ArrayXd>& Q, bool testNA){
   int    P_len = P.size();
   int    Q_len = Q.size();
   double dist  = 0.0;
   double diff  = 0.0;
 
   if (P_len != Q_len){
-    Rcpp::stop("The vectors you are comparing do not have the same length!");
+    //Rcpp::
+    stop("The vectors you are comparing do not have the same length!");
   }
 
   if (testNA){

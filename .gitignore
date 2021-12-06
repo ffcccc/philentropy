@@ -7,3 +7,7 @@ src/*.so
 src/*.dll
 /src/.vs
 *.user
+*.ipch
+Win/philWIN/.vs/philWIN/v16/Browse.VC.db
+Win/philWIN/.vs/philWIN/v16/Browse.VC.db
+Win/philWIN/.vs/philWIN/v16/.suo
