@@ -9,6 +9,7 @@
 
 // #include <Rcpp.h>
 #include <algorithm>
+#include <math.h>
 
 
 //[[Rcpp::export]]
@@ -58,6 +59,26 @@ SEXP est_prob_empirical( SEXP CountVec ){
    return Rcpp::wrap( EmpiricalProb );
 }
 
+
+// [[Rcpp::export]]
+double custom_log2(const double& x) {
+    if (x == 0.0) {
+        return NAN;
+    }
+    else {
+        return log(x) / log(2.0);
+    }
+}
+
+// [[Rcpp::export]]
+double custom_log10(const double& x) {
+    if (x == 0.0) {
+        return NAN;
+    }
+    else {
+        return log(x) / log(10.0);
+    }
+}
 
 
 #endif // philentropy_UTILS_H

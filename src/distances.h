@@ -30,26 +30,25 @@
 #include <math.h>
 #include <iostream>
 #include "utils.h"
-#include <Eigen/Core>
-#include <Eigen/Dense>
 
-// [[Rcpp::export]]
-double custom_log2(const double& x ){
-        if (x == 0.0){
-          return NAN;
-        } else {
-          return log(x)/log(2.0);
-        }
-}
 
-// [[Rcpp::export]]
-double custom_log10(const double& x ){
-  if (x == 0.0){
-    return NAN;
-  } else {
-    return log(x)/log(10.0);
-  }
-}
+//// [[Rcpp::export]]
+//double custom_log2(const double& x ){
+//        if (x == 0.0){
+//          return NAN;
+//        } else {
+//          return log(x)/log(2.0);
+//        }
+//}
+//
+//// [[Rcpp::export]]
+//double custom_log10(const double& x ){
+//  if (x == 0.0){
+//    return NAN;
+//  } else {
+//    return log(x)/log(10.0);
+//  }
+//}
 
 
 //' @title Euclidean distance (lowlevel function)
@@ -89,41 +88,7 @@ double euclidean(const Rcpp::NumericVector& P,const Rcpp::NumericVector& Q, bool
         }
         return sqrt(dist);
 }
-// [[Rcpp::export]]
-double euclidean2(const Rcpp::NumericVector& P,const Rcpp::NumericVector& Q, bool testNA){
-  int    P_len = P.size();
-  int    Q_len = Q.size();
-  double dist  = 0.0;
-  double diff  = 0.0;
 
-  if (P_len != Q_len){
-    Rcpp::stop("The vectors you are comparing do not have the same length!");
-  }
-
-  if (testNA){
-    // for (int i = 0; i < P_len; i++){
-    //   if ((Rcpp::NumericVector::is_na(P[i])) || (Rcpp::NumericVector::is_na(Q[i]))){
-    //     Rcpp::stop("Your input vector stores NA values...");
-    //   }
-    //   diff = fabs(P[i] - Q[i]);
-    //   dist += diff * diff;
-    // }
-  } else {
-    // Eigen::VectorXd x = Rcpp::as<Eigen::VectorXd>(P);
-    // Eigen::VectorXd y = Rcpp::as<Eigen::VectorXd>(Q);
-    Eigen::Map<Eigen::VectorXd> x(Rcpp::as<Eigen::Map<Eigen::VectorXd> >(P));
-    Eigen::Map<Eigen::VectorXd> y(Rcpp::as<Eigen::Map<Eigen::VectorXd> >(Q));
-    //static _Tp compute(const Eigen::Array<_Tp, -1, 1>& x, const Eigen::Array<_Tp, -1, 1>& y) {
-    // assert(x.size() > 0);
-    // assert(x.size() == y.size());
-
-    //return (x - y).square().sum();
-    //dist = (x - y).matrix().squaredNorm();
-    dist = (x - y).norm();
-    return dist;
-  }
-  return sqrt(dist);
-}
 
 //' @title Manhattan distance (lowlevel function)
 //' @description The lowlevel function for computing the manhattan distance.
